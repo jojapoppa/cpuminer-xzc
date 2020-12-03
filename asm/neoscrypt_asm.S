@@ -29,12 +29,12 @@
 #include "miner.h"
 #endif
 
-#if defined(__GNUC__) && !defined(__arm__)
+#if defined(__GNUC__) && defined(__arm__)
 #define ASM 1
 /* #define WIN64 0 */
 #endif
 
-#if (ASM) && (__x86_64__)
+#if (ASM) && (__x86_64__) 
 
 /* neoscrypt_blkcpy(dst, src, len) = SSE2 based block memcpy();
  * len must be a multiple of 64 bytes aligned properly */
@@ -397,7 +397,7 @@ neoscrypt_chacha:
 #endif
 	ret
 
-#endif /* (ASM) && (__x86_64__) */
+#endif  /* (ASM) && (__x86_64__) */
 
 
 #if (ASM) && (__i386__)
@@ -742,4 +742,5 @@ _neoscrypt_chacha:
 	addl	$16, %esp
 	ret
 
-#endif /* (ASM) && (__i386__) */
+#endif
+/*      (ASM) && (__i386__) */

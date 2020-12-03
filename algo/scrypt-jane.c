@@ -18,7 +18,7 @@
 #define SCRYPT_CHACHA
 #define SCRYPT_CHOOSE_COMPILETIME
 
-//#include "scrypt-jane.h"
+/* #include "scrypt-jane.h" */
 #include "../scryptjane/scrypt-jane-portable.h"
 #include "../scryptjane/scrypt-jane-hash.h"
 #include "../scryptjane/scrypt-jane-romix.h"

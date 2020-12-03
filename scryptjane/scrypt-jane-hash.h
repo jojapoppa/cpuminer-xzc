@@ -27,7 +27,7 @@
 
 #define SCRYPT_TEST_HASH_LEN 257 /* (2 * largest block size) + 1 */
 
-static int
+/* static int
 scrypt_test_hash() {
 	scrypt_hash_state st;
 	scrypt_hash_digest hash, final;
@@ -44,5 +44,5 @@ scrypt_test_hash() {
 	}
 	scrypt_hash_finish(&st, final);
 	return scrypt_verify(final, scrypt_test_hash_expected, SCRYPT_HASH_DIGEST_SIZE);
-}
+} */
 

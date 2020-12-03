@@ -26,6 +26,10 @@
 #include <curl/curl.h>
 #include <time.h>
 #include <sys/stat.h>
+
+#include <signal.h>
+#include <sys/select.h>
+
 #if defined(WIN32)
 #include <winsock2.h>
 #include <mstcpip.h>
@@ -1015,21 +1019,40 @@ bool stratum_send_line(struct stratum_ctx *sctx, char *s)
 
 static bool socket_full(curl_socket_t sock, int timeout)
 {
-	struct timeval tv;
+	//struct timeval tv;
+	struct timespec t;
 	fd_set rd;
+        bool ret = true;
+	sigset_t pselect_set;
+
+        //applog(LOG_DEBUG,"DEBUG: in socket_full, timeout is %d",timeout);
 
 	FD_ZERO(&rd);
+	sigemptyset(&pselect_set);
+	sigaddset(&pselect_set, SIGALRM);
+
 	FD_SET(sock, &rd);
-	tv.tv_sec = timeout;
-	tv.tv_usec = 0;
-	if (select((int)(sock + 1), &rd, NULL, NULL, &tv) > 0)
-		return true;
-	return false;
+	t.tv_sec = timeout;
+	t.tv_nsec = 0;
+
+	if (pselect((int)(sock + 1), &rd, NULL, NULL, &t, &pselect_set) > 0)
+		ret = true;
+	else
+		ret = false;
+
+        //applog(LOG_DEBUG,"DEBUG: in socket_full return is: %d", ret);
+	return ret;
 }
 
 bool stratum_socket_full(struct stratum_ctx *sctx, int timeout)
 {
-	return strlen(sctx->sockbuf) || socket_full(sctx->sock, timeout);
+//applog(LOG_DEBUG,"DEBUG: in stratum_socket_full");
+
+        if (strlen(sctx->sockbuf))
+          return true;
+
+//applog(LOG_DEBUG,"DEBUG: calling socket_full");
+	return socket_full(sctx->sock, timeout);
 }
 
 #define RBUFSIZE 2048
@@ -1053,6 +1076,8 @@ char *stratum_recv_line(struct stratum_ctx *sctx)
 	ssize_t len, buflen;
 	char *tok, *sret = NULL;
 
+        bool bEndbuf = false;
+
 	if (!strstr(sctx->sockbuf, "\n")) {
 		bool ret = true;
 		time_t rstart;
@@ -1063,11 +1088,12 @@ char *stratum_recv_line(struct stratum_ctx *sctx)
 			goto out;
 		}
 		do {
-			char s[RBUFSIZE];
+			char s[RBUFSIZE+10];
 			ssize_t n;
 
-			memset(s, 0, RBUFSIZE);
+			memset(s, 0, RBUFSIZE+1);
 			n = recv(sctx->sock, s, RECVSIZE, 0);
+
 			if (!n) {
 				ret = false;
 				break;
@@ -1077,9 +1103,11 @@ char *stratum_recv_line(struct stratum_ctx *sctx)
 					ret = false;
 					break;
 				}
-			} else
+			} else {
 				stratum_buffer_append(sctx, s);
-		} while (time(NULL) - rstart < 60 && !strstr(sctx->sockbuf, "\n"));
+			}
+			bEndbuf = strstr(sctx->sockbuf, "\n");
+		} while (time(NULL) - rstart < 60 && !bEndbuf);
 
 		if (!ret) {
 			applog(LOG_ERR, "stratum_recv_line failed");

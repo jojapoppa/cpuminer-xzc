@@ -238,6 +238,7 @@
     (v) = ((v) << 32) | ((v) >> 32);                                                        \
 }
 
+/*
 static int
 scrypt_verify(const uint8_t *x, const uint8_t *y, size_t len) {
 	uint32_t differentbits = 0;
@@ -245,6 +246,7 @@ scrypt_verify(const uint8_t *x, const uint8_t *y, size_t len) {
 		differentbits |= (*x++ ^ *y++);
 	return (1 & ((differentbits - 1) >> 8));
 }
+*/
 
 void
 scrypt_ensure_zero(void *p, size_t len) {

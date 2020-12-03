@@ -22,6 +22,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <signal.h>
+#include <execinfo.h>
 
 #include <curl/curl.h>
 #include <jansson.h>
@@ -1755,6 +1756,8 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 				work_set_target(work, sctx->job.diff / opt_diff_factor);
 		}
 
+                applog(LOG_DEBUG, "DEBUG: work_set_target complete");
+
 		if (stratum_diff != sctx->job.diff) {
 			char sdiff[32] = { 0 };
 			// store for api stats
@@ -2566,10 +2569,12 @@ static void *stratum_thread(void *userdata)
 		if (stratum.job.job_id &&
 			(!g_work_time || strcmp(stratum.job.job_id, g_work.job_id)) )
 		{
+                        //applog(LOG_DEBUG, "DEBUG: stratum mutex lock - g_work_time");
 			pthread_mutex_lock(&g_work_lock);
 			stratum_gen_work(&stratum, &g_work);
 			time(&g_work_time);
 			pthread_mutex_unlock(&g_work_lock);
+			//applog(LOG_DEBUG, "DEBUG: stratum mutex unlock - g_work_time");
 
 			if (stratum.job.clean || jsonrpc_2) {
 				static uint32_t last_bloc_height;
@@ -2582,26 +2587,42 @@ static void *stratum_thread(void *userdata)
 						applog(LOG_BLUE, "%s %s block %d", short_url, algo_names[opt_algo],
 							stratum.bloc_height);
 				}
+                                //applog(LOG_DEBUG, "DEBUG: calling restart_threads()");
 				restart_threads();
+                                //applog(LOG_DEBUG, "DEBUG: ...done");
 			} else if (opt_debug && !opt_quiet) {
 					applog(LOG_BLUE, "%s asks job %d for block %d", short_url,
 						strtoul(stratum.job.job_id, NULL, 16), stratum.bloc_height);
 			}
 		}
 
+//pthread_mutex_lock(&g_work_lock);
+
 		if (!stratum_socket_full(&stratum, opt_timeout)) {
 			applog(LOG_ERR, "Stratum connection timeout");
 			s = NULL;
-		} else
+		} else {
+                        //applog(LOG_DEBUG,"DEBUG: calling stratum_recv_line");
 			s = stratum_recv_line(&stratum);
+                        //applog(LOG_DEBUG,"DEBUG:   done..."); 
+                }
 		if (!s) {
+                        applog(LOG_DEBUG,"DEBUG: stratum_disconnect");
 			stratum_disconnect(&stratum);
 			applog(LOG_ERR, "Stratum connection interrupted");
 			continue;
 		}
+
+                //applog(LOG_DEBUG,"DEBUG: stratum_handle_method");
 		if (!stratum_handle_method(&stratum, s))
 			stratum_handle_response(s);
+                //applog(LOG_DEBUG,"DEBUG:    done...");
+
+                //applog(LOG_DEBUG, "DEBUG: calling free(s)...");
 		free(s);
+                //applog(LOG_DEBUG, "DEBUG: free(s) worked!");
+
+//pthread_mutex_unlock(&g_work_lock);
 	}
 out:
 	return NULL;
@@ -3196,10 +3217,25 @@ static void show_credits()
 
 void get_defconfig_path(char *out, size_t bufsize, char *argv0);
 
+void stackhandler(int sig) {
+  void *array[10];
+  size_t size;
+
+  // get void*'s for all entries on the stack
+  size = backtrace(array, 10);
+
+  // print out all the frames to stderr
+  fprintf(stderr, "Error: signal %d:\n", sig);
+  backtrace_symbols_fd(array, size, STDERR_FILENO);
+  exit(1);
+}
+
 int main(int argc, char *argv[]) {
 	struct thr_info *thr;
 	long flags;
 	int i, err;
+
+        // signal(SIGSEGV, stackhandler);   // install stack trace handler
 
 	pthread_mutex_init(&applog_lock, NULL);
 
@@ -3399,6 +3435,8 @@ int main(int argc, char *argv[]) {
 		if (!thr->q)
 			return 1;
 
+		applog(LOG_DEBUG, "creating stratum thread");
+
 		/* start stratum thread */
 		err = thread_create(thr, stratum_thread);
 		if (err) {
@@ -3433,6 +3471,7 @@ int main(int argc, char *argv[]) {
 		if (!thr->q)
 			return 1;
 
+		applog(LOG_DEBUG, "creating mining thread: %d",i+1);
 		err = thread_create(thr, miner_thread);
 		if (err) {
 			applog(LOG_ERR, "thread %d create failed", i);

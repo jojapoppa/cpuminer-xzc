@@ -111,7 +111,7 @@ int cpu_fanpercent()
 	return 0;
 }
 
-#ifndef __arm__
+#ifdef __arm__
 static inline void cpuid(int functionnumber, int output[4]) {
 #if defined (_MSC_VER) || defined (__INTEL_COMPILER)
 	// Microsoft or Intel compiler, intrin.h included
@@ -193,7 +193,7 @@ void cpu_getmodelid(char *outbuf, size_t maxsz)
 		getenv("PROCESSOR_REVISION"), getenv("NUMBER_OF_PROCESSORS"));
 #else
 	FILE *fd = fopen("/proc/cpuinfo", "rb");
-	char *buf = NULL, *p, *eol;
+	char *buf = NULL, *p; /* , *eol; */
 	int cpufam = 0, model = 0, stepping = 0;
 	size_t size = 0;
 	if (!fd) return;

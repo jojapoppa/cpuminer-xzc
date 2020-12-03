@@ -21,8 +21,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <mm_malloc.h>
-#include <immintrin.h>
+
+#include <malloc.h>
+/* #include <mm_malloc.h> */
+
+#include <arm_neon.h>
+/* #include <immintrin.h> */
+
 #include "Lyra2.h"
 #include "Sponge.h"
 
@@ -62,7 +67,7 @@ int LYRA2(uint64_t* wholeMatrix, void *K, uint64_t kLen, const void *pwd, uint64
 
 
     const int64_t ROW_LEN_INT64 = BLOCK_LEN_INT64 * nCols;
-    const int64_t ROW_LEN_BYTES = ROW_LEN_INT64 * 8;
+    //const int64_t ROW_LEN_BYTES = ROW_LEN_INT64 * 8;
 
     if (wholeMatrix == NULL) {
       return -1;
@@ -110,7 +115,13 @@ int LYRA2(uint64_t* wholeMatrix, void *K, uint64_t kLen, const void *pwd, uint64
 
     //======================= Initializing the Sponge State ====================//
     //Sponge state: 16 uint64_t, BLOCK_LEN_INT64 words of them for the bitrate (b) and the remainder for the capacity (c)
-    uint64_t *state = _mm_malloc(16 * sizeof (uint64_t), 32);
+//  uint64_t *state = _mm_malloc(16 * sizeof (uint64_t), 32);
+//  uint64_t *state = aligned_alloc(16 * sizeof (uint64_t), 32);
+
+    void *p;
+    posix_memalign(&p, 32, (16 * sizeof (uint64_t)));
+    uint64_t *state = (uint64_t *)p;
+
     if (state == NULL) {
       return -1;
     }
@@ -187,7 +198,8 @@ int LYRA2(uint64_t* wholeMatrix, void *K, uint64_t kLen, const void *pwd, uint64
     //==========================================================================/
 
     //========================= Freeing the memory =============================//
-    _mm_free(state);
+//  _mm_free(state);
+    free(state);
     //==========================================================================/
 
     return 0;

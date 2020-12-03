@@ -1,5 +1,8 @@
+#include <stdlib.h>
 #include <memory.h>
-#include <mm_malloc.h>
+
+#include <malloc.h>
+/* #include <mm_malloc.h> */
 
 #include "sha3/sph_blake.h"
 
@@ -42,7 +45,12 @@ int scanhash_lyra2z(int thr_id, struct work *work, uint32_t max_nonce, uint64_t 
 {
 
 	size_t size = (int64_t) ((int64_t) 16 * 16 * 96);
-    uint64_t *wholeMatrix = _mm_malloc(size, 64);
+//      uint64_t *wholeMatrix = _mm_malloc(size, 64);
+//      uint64_t *wholeMatrix = aligned_alloc(size, 64);
+
+	void *p;
+	posix_memalign(&p, 64, size);
+	uint64_t *wholeMatrix = (uint64_t *)p;
 
 	uint32_t _ALIGN(128) hash[8];
 	uint32_t _ALIGN(128) endiandata[20];
@@ -69,7 +77,8 @@ int scanhash_lyra2z(int thr_id, struct work *work, uint32_t max_nonce, uint64_t 
 			work_set_target_ratio(work, hash);
 			pdata[19] = nonce;
 			*hashes_done = pdata[19] - first_nonce;
-			_mm_free(wholeMatrix);
+//                      _mm_free(wholeMatrix);
+			free(wholeMatrix);
 			return 1;
 		}
 		nonce++;
@@ -78,6 +87,8 @@ int scanhash_lyra2z(int thr_id, struct work *work, uint32_t max_nonce, uint64_t 
 
 	pdata[19] = nonce;
 	*hashes_done = pdata[19] - first_nonce + 1;
-	_mm_free(wholeMatrix);
+//	_mm_free(wholeMatrix);
+        free(wholeMatrix);
+
 	return 0;
 }

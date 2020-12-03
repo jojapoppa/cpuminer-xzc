@@ -1,0 +1,26 @@
+crypto/cpuminer-aesb.o: crypto/aesb.c /usr/include/stdc-predef.h \
+ /usr/lib/gcc/aarch64-linux-gnu/4.9/include/stdint.h \
+ /usr/include/stdint.h /usr/include/features.h \
+ /usr/include/aarch64-linux-gnu/sys/cdefs.h \
+ /usr/include/aarch64-linux-gnu/bits/wordsize.h \
+ /usr/include/aarch64-linux-gnu/gnu/stubs.h \
+ /usr/include/aarch64-linux-gnu/gnu/stubs-lp64.h \
+ /usr/include/aarch64-linux-gnu/bits/wchar.h
+
+/usr/include/stdc-predef.h:
+
+/usr/lib/gcc/aarch64-linux-gnu/4.9/include/stdint.h:
+
+/usr/include/stdint.h:
+
+/usr/include/features.h:
+
+/usr/include/aarch64-linux-gnu/sys/cdefs.h:
+
+/usr/include/aarch64-linux-gnu/bits/wordsize.h:
+
+/usr/include/aarch64-linux-gnu/gnu/stubs.h:
+
+/usr/include/aarch64-linux-gnu/gnu/stubs-lp64.h:
+
+/usr/include/aarch64-linux-gnu/bits/wchar.h:

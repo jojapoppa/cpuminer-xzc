@@ -38,19 +38,21 @@
 
 #define STACK_ALIGN 0x40
 
-#ifdef _MSC_VER // todo: msvc
 #define ASM 0
-#elif defined(__arm__)
-#define ASM 0
-#endif
 
-#ifdef __GNUC__
-#if defined(NOASM) || defined(__arm__)
-#define ASM 0
-#else
-#define ASM 1
-#endif
-#endif
+//#ifdef _MSC_VER // todo: msvc
+//#define ASM 0
+//#elif defined(__arm__)
+//#define ASM 0
+//#endif
+
+//#ifdef __GNUC__
+//#if defined(NOASM) || defined(__arm__)
+//#define ASM 0
+//#else
+//#define ASM 1
+//#endif
+//#endif
 
 #if (WINDOWS)
 /* sizeof(unsigned long) = 4 for MinGW64 */

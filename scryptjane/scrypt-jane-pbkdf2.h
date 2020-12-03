@@ -66,40 +66,40 @@ scrypt_hmac_finish(scrypt_hmac_state *st, scrypt_hash_digest mac) {
 #endif
 }
 
-static void
+/* static void
 scrypt_pbkdf2(const uint8_t *password, size_t password_len, const uint8_t *salt, size_t salt_len, uint64_t N, uint8_t *out, size_t bytes) {
 	scrypt_hmac_state hmac_pw, hmac_pw_salt, work;
 	scrypt_hash_digest ti, u;
 	uint8_t be[4];
 	uint32_t i, j, blocks;
-	uint64_t c;
+	uint64_t c; 
 
-	/* bytes must be <= (0xffffffff - (SCRYPT_HASH_DIGEST_SIZE - 1)), which they will always be under scrypt */
+	// bytes must be <= (0xffffffff - (SCRYPT_HASH_DIGEST_SIZE - 1)), which they will always be under scrypt 
 
-	/* hmac(password, ...) */
+	// hmac(password, ...) 
 	scrypt_hmac_init(&hmac_pw, password, password_len);
 
-	/* hmac(password, salt...) */
+	// hmac(password, salt...) 
 	hmac_pw_salt = hmac_pw;
 	scrypt_hmac_update(&hmac_pw_salt, salt, salt_len);
 
 	blocks = ((uint32_t)bytes + (SCRYPT_HASH_DIGEST_SIZE - 1)) / SCRYPT_HASH_DIGEST_SIZE;
 	for (i = 1; i <= blocks; i++) {
-		/* U1 = hmac(password, salt || be(i)) */
+		// U1 = hmac(password, salt || be(i)) 
 		U32TO8_BE(be, i);
 		work = hmac_pw_salt;
 		scrypt_hmac_update(&work, be, 4);
 		scrypt_hmac_finish(&work, ti);
 		memcpy(u, ti, sizeof(u));
 
-		/* T[i] = U1 ^ U2 ^ U3... */
+		// T[i] = U1 ^ U2 ^ U3... 
 		for (c = 0; c < N - 1; c++) {
-			/* UX = hmac(password, U{X-1}) */
+			// UX = hmac(password, U{X-1}) 
 			work = hmac_pw;
 			scrypt_hmac_update(&work, u, SCRYPT_HASH_DIGEST_SIZE);
 			scrypt_hmac_finish(&work, u);
 
-			/* T[i] ^= UX */
+			// T[i] ^= UX 
 			for (j = 0; j < sizeof(u); j++)
 				ti[j] ^= u[j];
 		}
@@ -116,6 +116,7 @@ scrypt_pbkdf2(const uint8_t *password, size_t password_len, const uint8_t *salt,
 	scrypt_ensure_zero(&hmac_pw_salt, sizeof(hmac_pw_salt));
 #endif
 }
+*/
 
 /*
  * Special version where N = 1

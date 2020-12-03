@@ -12,6 +12,9 @@
 #endif
 #endif
 
+/* Added by Rob */
+#define NOASM
+
 #include "crypto/oaes_lib.h"
 #include "crypto/c_keccak.h"
 #include "crypto/c_groestl.h"
